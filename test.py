@@ -45,7 +45,8 @@ class TestLinearRegression(unittest.TestCase):
 
   def test_linear_regression_can_learn_doubling(self):
     model = lr.linear_regression(
-      np.array([[1.0, 2.0], [2.0, 4.0], [3.0, 6.0], [4.0, 8.0]])
+      np.array([[1.0, 2.0], [2.0, 4.0], [3.0, 6.0], [4.0, 8.0]]),
+      iterations=5000
     )
     self.assertAlmostEqual(model.θ[0][0], 0.0, places=3)
     self.assertAlmostEqual(model.θ[1][0], 2.0, places=3)

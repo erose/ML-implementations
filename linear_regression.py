@@ -13,7 +13,9 @@ class Model:
     """
 
     if θ.ndim != 2:
-      raise ValueError(f"Expected model input to be a column vector, but it had ndim == {θ.ndim}")
+      raise ValueError(f"Expected θ to be a column vector, but it had ndim == {θ.ndim}")
+    if θ.shape[1] != 1:
+      raise ValueError(f"Expected θ to be a column vector, but it had shape == {θ.shape}")
 
     self.θ = θ
 
@@ -38,6 +40,10 @@ class Model:
     return X @ self.θ
 
   def __repr__(self):
+    """
+    produce a string like "2.345 + 18.607*x_1 + 13.232*x_2"
+    """
+
     theta_values = list(self.θ[:, -1])
 
     first_term = [str(theta_values[0])]
@@ -54,54 +60,49 @@ def J(data: np.ndarray, model: Model):
   error = model.predict(X) - y
   return np.mean(error ** 2)
 
-def d_J_d_theta_0(data: np.ndarray, model: Model):
-  y = data[:, -1:]
-  X = data[:, :-1]
-  error = model.predict(X) - y
-  return np.mean(error)
+"""
+The derivative of J with respect to θ_i.
+"""
 
-def d_J_d_theta_i(i: int, data: np.ndarray, model: Model):
+def dJ_dθ_i(i: int, data: np.ndarray, model: Model):
   y = data[:, -1:]
   X = data[:, :-1]
   error = model.predict(X) - y
+
+  if i == 0:
+    return np.mean(error)
 
   ith_feature_column = X[:, [i - 1]] # theta_1 is the coefficient on the zeroth column of X
   return np.mean(ith_feature_column * error)
 
-def linear_regression(data: np.ndarray) -> Model:
+def linear_regression(data: np.ndarray, iterations=5000) -> Model:
   """
   data is an m x n float array.
   """
   m, n = data.shape
 
-  alpha = 0.1 # Arbitrary. Not sure what the principled way to choose this is.
-  initial_parameters = np.array([[0.0], [0.0]]) # Arbitrary initial guess.
-  epsilon = 0.00001 # Arbitrary.
+  alpha = 0.01 # Arbitrary. Not sure what the principled way to choose this is.
+  initial_parameters = np.zeros((n, 1)) # Arbitrary initial guess.
+  epsilon = 0.001 # Arbitrary.
   
   model = Model(initial_parameters)
   
-  # Do gradient descent until convergence.
-  i = 0
-  while True:
-    # Gather the partial derivatives with respect to each theta_i into the gradient.
-    gradient = np.array([
-      [d_J_d_theta_0(data, model)],
-      *[[d_J_d_theta_i(i, data, model)] for i in range(1, n)],
-    ])
-
-    if np.linalg.norm(gradient) < epsilon:
-      break
+  # Do gradient descent.
+  for i in range(iterations):
+    # Gather the partial derivatives with respect to each θ_i into the gradient.
+    gradient = np.array([[dJ_dθ_i(i, data, model)] for i in range(n)])
 
     model.adjust_by(-alpha * gradient)
     # print(f"Iteration: {i}")
     # print(f"J: {J(data, model)}")
-    i += 1
+    # print("magnitude of gradient", np.linalg.norm(gradient))
+    # print(f"model: {model}")
 
   return model
 
 if __name__ == "__main__":
   df = pandas.read_csv('boston_housing.csv')
-  distance_to_median_value = df[['dis', 'medv']].to_numpy()
+  data = df[['dis', 'rm', 'medv']].to_numpy()
 
-  model = linear_regression(distance_to_median_value)
+  model = linear_regression(data)
   print(model)
