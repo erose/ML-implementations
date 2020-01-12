@@ -3,6 +3,7 @@ import numpy as np
 import pandas
 
 from model import Model
+from gradient_descent import gradient_descent
 
 class LogisticModel(Model):
   """
@@ -22,8 +23,18 @@ class LogisticModel(Model):
 
     return self.sigmoid(X @ self.θ)
 
-  def sigmoid(self, z):
+  def sigmoid(self, z: np.ndarray) -> np.ndarray:
     return 1.0 / (1.0 + np.exp(-z))
 
   def __repr__(self) -> str:
     pass
+
+def logistic_regression(data) -> Model:
+  return gradient_descent(data, LogisticModel, J, dJ_dθ_i)
+
+if __name__ == "__main__":
+  df = pandas.read_csv('boston_housing.csv')
+  data = df[['dis', 'chas']].to_numpy()
+
+  model = logistic_regression(data)
+  print(model)
