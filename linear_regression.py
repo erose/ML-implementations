@@ -2,29 +2,13 @@ from typing import *
 import numpy as np
 import pandas
 
-class Model:
+from model import Model
+from gradient_descent import gradient_descent
+
+class LinearModel(Model):
   """
   The linear model y(x) = θ . x
   """
-
-  def __init__(self, θ: np.ndarray):
-    """
-    θ is an array of floats θ_0, θ_1 ... such that y(x) = θ_0 + x_1*θ_1 + ...
-    """
-
-    if θ.ndim != 2:
-      raise ValueError(f"Expected θ to be a column vector, but it had ndim == {θ.ndim}")
-    if θ.shape[1] != 1:
-      raise ValueError(f"Expected θ to be a column vector, but it had shape == {θ.shape}")
-
-    self.θ = θ
-
-  def adjust_by(self, delta: np.ndarray):
-    """
-    delta is an array of floats ordered the same way as θ.
-    """
-
-    self.θ += delta
 
   def predict(self, X: np.ndarray) -> np.ndarray:
     """
@@ -39,7 +23,7 @@ class Model:
 
     return X @ self.θ
 
-  def __repr__(self):
+  def __repr__(self) -> str:
     """
     produce a string like "2.345 + 18.607*x_1 + 13.232*x_2"
     """
@@ -75,30 +59,8 @@ def dJ_dθ_i(i: int, data: np.ndarray, model: Model):
   ith_feature_column = X[:, [i - 1]] # theta_1 is the coefficient on the zeroth column of X
   return np.mean(ith_feature_column * error)
 
-def linear_regression(data: np.ndarray, iterations=5000) -> Model:
-  """
-  data is an m x n float array.
-  """
-  m, n = data.shape
-
-  alpha = 0.01 # Arbitrary. Not sure what the principled way to choose this is.
-  initial_parameters = np.zeros((n, 1)) # Arbitrary initial guess.
-  epsilon = 0.001 # Arbitrary.
-  
-  model = Model(initial_parameters)
-  
-  # Do gradient descent.
-  for i in range(iterations):
-    # Gather the partial derivatives with respect to each θ_i into the gradient.
-    gradient = np.array([[dJ_dθ_i(i, data, model)] for i in range(n)])
-
-    model.adjust_by(-alpha * gradient)
-    # print(f"Iteration: {i}")
-    # print(f"J: {J(data, model)}")
-    # print("magnitude of gradient", np.linalg.norm(gradient))
-    # print(f"model: {model}")
-
-  return model
+def linear_regression(data) -> Model:
+  return gradient_descent(data, LinearModel, J, dJ_dθ_i)
 
 if __name__ == "__main__":
   df = pandas.read_csv('boston_housing.csv')
