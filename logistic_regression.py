@@ -27,14 +27,62 @@ class LogisticModel(Model):
     return 1.0 / (1.0 + np.exp(-z))
 
   def __repr__(self) -> str:
-    pass
+    """
+    Produce a string like "sigmoid(2.345 + 18.607*x_1 + 13.232*x_2)"
+    """
+
+    theta_values = list(self.θ[:, -1])
+
+    first_term = [str(theta_values[0])]
+    remaining_terms = [f"{θ_i}*x_{i+1}" for i, θ_i in enumerate(theta_values[1:])]
+    inner_string = " + ".join(first_term + remaining_terms)
+
+    return f"sigmoid({inner_string})"
+
+"""
+J is our loss function: J(h_theta) = (1/m) sum_{i}^m (-y_i * log(h_theta(x_i)) - (1 - y_i) * log(1 - h_theta(x_i)))
+"""
+
+def J(data: np.ndarray, model: Model):
+  y = data[:, -1:] # the output is the last column in the data array
+  X = data[:, :-1] # everything else is the input
+  predicted = model.predict(X)
+  return np.mean(y * -np.log(predicted) + (1 - y) * -np.log(1 - predicted))
+
+"""
+The derivative of J with respect to θ_i.
+"""
+
+def dJ_dθ_i(i: int, data: np.ndarray, model: Model):
+  y = data[:, -1:]
+  X = data[:, :-1]
+  error = model.predict(X) - y
+
+  if i == 0:
+    return np.mean(error)
+
+  ith_feature_column = X[:, [i - 1]] # theta_1 is the coefficient on the zeroth column of X
+  return np.mean(ith_feature_column * error)
 
 def logistic_regression(data) -> Model:
   return gradient_descent(data, LogisticModel, J, dJ_dθ_i)
 
+def percentage_correct(model, data) -> int:
+  """
+  Returns a number out of 100.
+  """
+
+  y = data[:, -1:]
+  X = data[:, :-1]
+
+  predicted = np.round(model.predict(X))
+  number_correct = np.sum(predicted == y)
+  return int((number_correct / predicted.size) * 100)
+
 if __name__ == "__main__":
   df = pandas.read_csv('boston_housing.csv')
-  data = df[['dis', 'chas']].to_numpy()
+  data = df[['medv', 'chas']].to_numpy()
 
   model = logistic_regression(data)
+  print(percentage_correct(model, data))
   print(model)

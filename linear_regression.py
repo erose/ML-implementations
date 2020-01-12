@@ -25,7 +25,7 @@ class LinearModel(Model):
 
   def __repr__(self) -> str:
     """
-    produce a string like "2.345 + 18.607*x_1 + 13.232*x_2"
+    Produce a string like "2.345 + 18.607*x_1 + 13.232*x_2"
     """
 
     theta_values = list(self.θ[:, -1])
