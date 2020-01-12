@@ -67,4 +67,11 @@ if __name__ == "__main__":
   data = df[['dis', 'rm', 'medv']].to_numpy()
 
   model = linear_regression(data)
-  print(model)
+  print("Our model", model)
+
+  # Compare against sklearn.
+  import sklearn.linear_model
+  y = data[:, -1:]
+  X = data[:, :-1]
+  sklearn_model = sklearn.linear_model.LinearRegression().fit(X, y)
+  print("sklearn's model", sklearn_model.intercept_, sklearn_model.coef_)

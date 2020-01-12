@@ -84,5 +84,11 @@ if __name__ == "__main__":
   data = df[['medv', 'chas']].to_numpy()
 
   model = logistic_regression(data)
-  print(percentage_correct(model, data))
-  print(model)
+  print("Our model's percentage_correct", percentage_correct(model, data))
+
+  # Compare against sklearn.
+  import sklearn.linear_model
+  y = data[:, -1:].ravel() # sklearn requires input as a 1-d array for some reason.
+  X = data[:, :-1]
+  sklearn_model = sklearn.linear_model.LogisticRegression().fit(X, y)
+  print("sklearn model's percentage_correct", int(sklearn_model.score(X, y) * 100))
