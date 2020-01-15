@@ -49,7 +49,7 @@ class NeuralNetwork(Model):
     return h_theta
 
   def __repr__(self) -> str:
-    raise Exception("TODO")
+    raise NotImplemented
 
 if __name__ == "__main__":
   data_mat = scipy.io.loadmat('mnist_data.mat')
@@ -61,7 +61,8 @@ if __name__ == "__main__":
 
   probabilities = model.predict(X)
   # Because the weights think of '0' as '10', the last probability in a row is really the
-  # probability that the digit is '0', not '9'. So we need to correct them.
+  # probability that the digit is '0', not '9'. So we cyclically shift each row one to the right to
+  # correct this.
   probabilities = np.roll(probabilities, 1)
   predictions = np.argmax(probabilities, axis=1)
 
