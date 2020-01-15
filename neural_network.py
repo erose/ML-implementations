@@ -1,6 +1,6 @@
 from typing import *
 import numpy as np
-import pandas
+import scipy.io
 
 import utils
 from model import Model
@@ -25,14 +25,14 @@ class NeuralNetwork(Model):
     for i, (Θa, Θb) in enumerate(zip(Θs, Θs[1:])):
       (p, q) = Θa.shape
       (r, s) = Θb.shape
-      if q != r+1:
+      if p+1 != s:
         raise ValueError(f"Expected matrices {i} and {i+1} in Θs to be compatible, but matrix {i} had shape {Θa.shape} while matrix {i+1} had shape {Θb.shape}.")
 
     self.Θs = Θs
 
   def predict(self, X: np.ndarray) -> np.ndarray:
     """
-    X is an a x b array of feature vectors, where a+1 is the number of nodes in the first layer of the
+    X is an a x b array of feature vectors, where b+1 is the number of nodes in the first layer of the
     network. (The +1 is because of the bias node.)
     """
 
@@ -42,7 +42,7 @@ class NeuralNetwork(Model):
 
     for i in range(len(self.Θs)):
       A = utils.prepend_ones(A)
-      Z = A @ self.Θs[i]
+      Z = A @ self.Θs[i].T
       A = utils.sigmoid(Z)
 
     h_theta = A
@@ -50,3 +50,19 @@ class NeuralNetwork(Model):
 
   def __repr__(self) -> str:
     raise Exception("TODO")
+
+if __name__ == "__main__":
+  data_mat = scipy.io.loadmat('mnist_data.mat')
+  X = data_mat['X']
+  y = data_mat['y'] % 10 # The data encodes '0' as '10'.
+
+  weights_mat = scipy.io.loadmat('mnist_weights.mat')
+  model = NeuralNetwork([weights_mat['Theta1'], weights_mat['Theta2']])
+
+  probabilities = model.predict(X)
+  # Because the weights think of '0' as '10', the last probability in a row is really the
+  # probability that the digit is '0', not '9'. So we need to correct them.
+  probabilities = np.roll(probabilities, 1)
+  predictions = np.argmax(probabilities, axis=1)
+
+  print("Training set accuracy:", np.mean(predictions == y[:, 0]))

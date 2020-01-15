@@ -16,36 +16,36 @@ class TestLinearRegression(unittest.TestCase):
   def test_cost_function_on_constant_model(self):
     dumb_model = linr.LinearModel(np.array([[6, 0]]).T)
 
-    data = np.array([
+    X = np.array([
       [1, 2], # cost (6 - 2)^2 = 16
     ])
-    cost = linr.J(data, dumb_model)
+    cost = linr.J(X, dumb_model)
     self.assertEqual(cost, 16)
 
-    data = np.array([
+    X = np.array([
       [1, 2], # cost (6 - 2)^2 = 16
       [0, 0], # cost (6 - 0)^2 = 36
     ])
-    cost = linr.J(data, dumb_model)
+    cost = linr.J(X, dumb_model)
     self.assertEqual(cost, (16 + 36) / 2)
 
   def test_cost_function(self):
-    data = np.array([
+    X = np.array([
       [1, 2], # cost (6 + 1*1 - 2)^2 = 25
     ])
     model = linr.LinearModel(np.array([[6, 1]]).T)
-    cost = linr.J(data, model)
+    cost = linr.J(X, model)
     self.assertEqual(cost, 25)
 
     # now test a correct model that should have zero cost
-    data = np.array([
+    X = np.array([
       [1, 2],
       [2, 4],
       [3, 6],
       [4, 8],
     ])
     correct_model = linr.LinearModel(np.array([[0, 2]]).T)
-    cost = linr.J(data, correct_model)
+    cost = linr.J(X, correct_model)
     self.assertEqual(cost, 0)
 
   def test_linear_regression_can_learn_doubling(self):
@@ -59,16 +59,16 @@ class TestLinearRegression(unittest.TestCase):
 class TestLogisticRegression(unittest.TestCase):
   def test_cost_function_on_constant_model(self):
     dumb_model = logr.LogisticModel(np.array([[6, 0]]).T)
-    data = np.array([
+    X = np.array([
       [1, 1], # cost -log(sigmoid(6)) ~= 0.02 
     ])
-    cost = logr.J(data, dumb_model)
+    cost = logr.J(X, dumb_model)
     self.assertAlmostEqual(cost, 0.002, places=3)
 
-    data = np.array([
+    X = np.array([
       [1, 0], # cost -log(1 - sigmoid(6)) ~= 6.002 
     ])
-    cost = logr.J(data, dumb_model)
+    cost = logr.J(X, dumb_model)
     self.assertAlmostEqual(cost, 6.002, places=3)
 
   def test_logistic_regression_can_learn_cutoff(self):
@@ -87,7 +87,7 @@ class TestNeuralNetwork(unittest.TestCase):
       np.array([[0.0], [1.0], [1.0]]),
     ])
 
-    data = np.array([
+    X = np.array([
       [2.0, 0.0],
       [0.0, -1.0],
     ])
@@ -96,7 +96,7 @@ class TestNeuralNetwork(unittest.TestCase):
       [utils.sigmoid(-1)],
     ])
 
-    numpy.testing.assert_almost_equal(model.predict(data), expected_output, decimal=3)
+    numpy.testing.assert_almost_equal(model.predict(X), expected_output, decimal=3)
 
 if __name__ == '__main__':
   unittest.main()
