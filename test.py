@@ -1,7 +1,11 @@
 import unittest
 import numpy as np
+import numpy.testing
+
+import utils
 import linear_regression as linr
 import logistic_regression as logr
+import neural_network as nn
 
 class TestLinearModel(unittest.TestCase):
   def test_model_can_be_printed(self):
@@ -74,6 +78,25 @@ class TestLogisticRegression(unittest.TestCase):
 
     prediction = model.predict(np.array([[5.0]]))
     self.assertAlmostEqual(prediction[0][0], 0.988, places=3)
+
+class TestNeuralNetwork(unittest.TestCase):
+  def test_can_predict_with_simple_architecture(self):
+    # The network has two layers, with two nodes in the first and one node in the second. It's just
+    # a logistic regressor that takes two inputs.
+    model = nn.NeuralNetwork([
+      np.array([[0.0], [1.0], [1.0]]),
+    ])
+
+    data = np.array([
+      [2.0, 0.0],
+      [0.0, -1.0],
+    ])
+    expected_output = np.array([
+      [utils.sigmoid(2)],
+      [utils.sigmoid(-1)],
+    ])
+
+    numpy.testing.assert_almost_equal(model.predict(data), expected_output, decimal=3)
 
 if __name__ == '__main__':
   unittest.main()

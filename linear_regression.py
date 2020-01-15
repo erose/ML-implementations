@@ -2,6 +2,7 @@ from typing import *
 import numpy as np
 import pandas
 
+import utils
 from model import Model
 from gradient_descent import gradient_descent
 
@@ -37,9 +38,7 @@ class LinearModel(Model):
     """
 
     # Prepend a column of ones to X; these will be dotted with θ_0.
-    (m, _) = X.shape
-    X = np.c_[np.ones(m), X]
-
+    X = utils.prepend_ones(X)
     return X @ self.θ
 
   def __repr__(self) -> str:
