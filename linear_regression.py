@@ -10,6 +10,25 @@ class LinearModel(Model):
   The linear model y(x) = θ . x
   """
 
+  def __init__(self, θ: np.ndarray):
+    """
+    θ is an array of floats θ_0, θ_1 ...
+    """
+
+    if θ.ndim != 2:
+      raise ValueError(f"Expected θ to be a column vector, but it had ndim == {θ.ndim}")
+    if θ.shape[1] != 1:
+      raise ValueError(f"Expected θ to be a column vector, but it had shape == {θ.shape}")
+
+    self.θ = θ
+
+  def adjust_by(self, delta: np.ndarray):
+    """
+    delta is an array of floats ordered the same way as θ.
+    """
+
+    self.θ += delta
+
   def predict(self, X: np.ndarray) -> np.ndarray:
     """
     X is an m x n array of feature vectors, where n+1 is the number of elements in θ. Theta has

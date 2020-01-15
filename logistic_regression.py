@@ -2,6 +2,7 @@ from typing import *
 import numpy as np
 import pandas
 
+import utils
 from model import Model
 from gradient_descent import gradient_descent
 
@@ -9,6 +10,25 @@ class LogisticModel(Model):
   """
   The logistic model y(x) = sigmoid(θ . x). y(x) is probabilities, not classifications.
   """
+
+  def __init__(self, θ: np.ndarray):
+    """
+    θ is an array of floats θ_0, θ_1 ...
+    """
+
+    if θ.ndim != 2:
+      raise ValueError(f"Expected θ to be a column vector, but it had ndim == {θ.ndim}")
+    if θ.shape[1] != 1:
+      raise ValueError(f"Expected θ to be a column vector, but it had shape == {θ.shape}")
+
+    self.θ = θ
+
+  def adjust_by(self, delta: np.ndarray):
+    """
+    delta is an array of floats ordered the same way as θ.
+    """
+
+    self.θ += delta
 
   def predict(self, X: np.ndarray) -> np.ndarray:
     """
@@ -21,10 +41,7 @@ class LogisticModel(Model):
     (m, _) = X.shape
     X = np.c_[np.ones(m), X]
 
-    return self.sigmoid(X @ self.θ)
-
-  def sigmoid(self, z: np.ndarray) -> np.ndarray:
-    return 1.0 / (1.0 + np.exp(-z))
+    return utils.sigmoid(X @ self.θ)
 
   def __repr__(self) -> str:
     """
