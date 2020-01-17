@@ -84,7 +84,7 @@ class TestNeuralNetwork(unittest.TestCase):
     # The network has two layers, with two nodes in the first and one node in the second. It's just
     # a logistic regressor that takes two inputs.
     model = nn.NeuralNetwork([
-      np.array([[0.0, 1.0, 1.0]]),
+      np.array([[0.0], [1.0], [1.0]]),
     ])
 
     X = np.array([
@@ -93,7 +93,7 @@ class TestNeuralNetwork(unittest.TestCase):
     ])
     expected_output = np.array([
       [utils.sigmoid(2)],
-      [utils.sigmoid(-1)],
+      [utils.sigmoid(-1)]
     ])
 
     numpy.testing.assert_almost_equal(model.predict(X), expected_output, decimal=3)

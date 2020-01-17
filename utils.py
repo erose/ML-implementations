@@ -10,3 +10,11 @@ def prepend_column_of_ones(A: np.ndarray) -> np.ndarray:
 
   (m, _) = A.shape
   return np.c_[np.ones(m), A]
+
+def prepend_row_of_ones(A: np.ndarray) -> np.ndarray:
+  """
+  Adds a row of ones to the top of A.
+  """
+
+  (_, n) = A.shape
+  return np.r_[[np.ones(n)], A]

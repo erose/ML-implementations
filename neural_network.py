@@ -25,7 +25,7 @@ class NeuralNetwork(Model):
     for i, (Θa, Θb) in enumerate(zip(Θs, Θs[1:])):
       (p, q) = Θa.shape
       (r, s) = Θb.shape
-      if p+1 != s:
+      if q+1 != r:
         raise ValueError(f"Expected matrices {i} and {i+1} in Θs to be compatible, but matrix {i} had shape {Θa.shape} while matrix {i+1} had shape {Θb.shape}.")
 
     self.Θs = Θs
@@ -42,8 +42,10 @@ class NeuralNetwork(Model):
     A = Z
 
     for i in range(len(self.Θs)):
+      # To every example, add in a 1 as a constant to be multiplied by the bias term in theta_i.
       A = utils.prepend_column_of_ones(A)
-      Z = A @ self.Θs[i].T
+      
+      Z = A @ self.Θs[i] # theta_i acts on the rows of A.
       A = utils.sigmoid(Z)
 
     h_theta = A
@@ -58,7 +60,10 @@ if __name__ == "__main__":
   y = data_mat['y'] % 10 # The data encodes '0' as '10'.
 
   weights_mat = scipy.io.loadmat('mnist_weights.mat')
-  model = NeuralNetwork([weights_mat['Theta1'], weights_mat['Theta2']])
+  # Take the transpose because the convention used in these files is different than ours.
+  theta1 = weights_mat['Theta1'].T
+  theta2 = weights_mat['Theta2'].T
+  model = NeuralNetwork([theta1, theta2])
 
   probabilities = model.predict(X)
   # Because the weights think of '0' as '10', the last probability in a row is really the
