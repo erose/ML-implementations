@@ -36,12 +36,13 @@ class NeuralNetwork(Model):
     network. (The +1 is because of the bias node.)
     """
 
-    # For each step, we add in the ones for the bias node, compute Z, then compute A.
+    # For each step, we add in the ones for the bias node, compute the weighted input for this layer
+    # Z, then the activation for this layer A.
     Z = X
     A = Z
 
     for i in range(len(self.Θs)):
-      A = utils.prepend_ones(A)
+      A = utils.prepend_column_of_ones(A)
       Z = A @ self.Θs[i].T
       A = utils.sigmoid(Z)
 

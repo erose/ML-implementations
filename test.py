@@ -84,7 +84,7 @@ class TestNeuralNetwork(unittest.TestCase):
     # The network has two layers, with two nodes in the first and one node in the second. It's just
     # a logistic regressor that takes two inputs.
     model = nn.NeuralNetwork([
-      np.array([[0.0], [1.0], [1.0]]),
+      np.array([[0.0, 1.0, 1.0]]),
     ])
 
     X = np.array([

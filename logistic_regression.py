@@ -38,7 +38,7 @@ class LogisticModel(Model):
     """
 
     # Prepend a column of ones to X; these will be dotted with θ_0.
-    X = utils.prepend_ones(X)
+    X = utils.prepend_column_of_ones(X)
     return utils.sigmoid(X @ self.θ)
 
   def __repr__(self) -> str:
