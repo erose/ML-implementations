@@ -4,9 +4,11 @@ import numpy as np
 from model import Model
 
 def gradient_descent(
-  data: np.ndarray, model_class: Type[Model],
+  data: np.ndarray,
+  model_class: Type[Model],
   J: Callable[[np.ndarray, Model], float],
   dJ_dθ_i: Callable[[int, np.ndarray, Model], float],
+  initial_parameters: Any,
   iterations=5000
 ):
   """
@@ -15,7 +17,6 @@ def gradient_descent(
   m, n = data.shape
 
   alpha = 0.01 # Arbitrary. Not sure what the principled way to choose this is.
-  initial_parameters = np.zeros((n, 1)) # Arbitrary initial guess.
   epsilon = 0.001 # Arbitrary.
   
   model = model_class(initial_parameters)

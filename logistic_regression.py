@@ -80,7 +80,10 @@ def dJ_dθ_i(i: int, data: np.ndarray, model: Model):
   return np.mean(ith_feature_column * error)
 
 def logistic_regression(data) -> Model:
-  return gradient_descent(data, LogisticModel, J, dJ_dθ_i)
+  m, n = data.shape
+  initial_parameters = np.zeros((n, 1))
+  
+  return gradient_descent(data, LogisticModel, J, dJ_dθ_i, initial_parameters)
 
 def percentage_correct(model, data) -> int:
   """

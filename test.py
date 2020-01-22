@@ -50,7 +50,12 @@ class TestLinearRegression(unittest.TestCase):
 
   def test_linear_regression_can_learn_doubling(self):
     model = linr.linear_regression(
-      np.array([[1.0, 2.0], [2.0, 4.0], [3.0, 6.0], [4.0, 8.0]]),
+      np.array([
+        [1.0, 2.0],
+        [2.0, 4.0],
+        [3.0, 6.0],
+        [4.0, 8.0]
+      ]),
     )
 
     prediction = model.predict(np.array([[6.0]]))
@@ -73,7 +78,13 @@ class TestLogisticRegression(unittest.TestCase):
 
   def test_logistic_regression_can_learn_cutoff(self):
     model = logr.logistic_regression(
-      np.array([[1.0, 0.0], [2.0, 0.0], [3.0, 1.0], [4.0, 1.0], [5.0, 1.0]]),
+      np.array([
+        [1.0, 0.0],
+        [2.0, 0.0],
+        [3.0, 1.0],
+        [4.0, 1.0],
+        [5.0, 1.0]
+      ]),
     )
 
     prediction = model.predict(np.array([[5.0]]))
@@ -84,7 +95,11 @@ class TestNeuralNetwork(unittest.TestCase):
     # The network has two layers, with two nodes in the first and one node in the second. It's just
     # a logistic regressor that takes two inputs.
     model = nn.NeuralNetwork([
-      np.array([[0.0], [1.0], [1.0]]),
+      np.array([
+        [0.0],
+        [1.0],
+        [1.0]
+      ]),
     ])
 
     X = np.array([
@@ -97,6 +112,35 @@ class TestNeuralNetwork(unittest.TestCase):
     ])
 
     numpy.testing.assert_almost_equal(model.predict(X), expected_output, decimal=3)
+
+  def test_cost_function_on_simple_model(self):
+    model = nn.NeuralNetwork([
+      np.array([
+        [0.0],
+        [1.0],
+        [1.0]
+      ]),
+    ])
+
+    data = np.array([
+      [2.0,  0.0, 0],
+      [0.0, -1.0, 1],
+    ])
+
+    log, σ = np.log, utils.sigmoid
+    expected_cost = np.mean([
+      # We always predict 0, so the first example suffers a cost for being unconfident.
+      -log(σ(2)),
+
+      # We always predict 0, so the second example suffers a cost for being confident.
+      -log(1 - σ(-1)),
+    ])
+    cost = nn.J(data, model)
+
+    self.assertAlmostEqual(expected_cost, cost, places=3)
+
+  # def test_can_learn_doubling_function(self):
+  #   model = nn.
 
 if __name__ == '__main__':
   unittest.main()

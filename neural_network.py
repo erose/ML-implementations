@@ -3,6 +3,7 @@ import numpy as np
 import scipy.io
 
 import utils
+from gradient_descent import gradient_descent
 from model import Model
 
 class NeuralNetwork(Model):
@@ -42,10 +43,10 @@ class NeuralNetwork(Model):
     A = Z
 
     for i in range(len(self.Θs)):
-      # To every example, add in a 1 as a constant to be multiplied by the bias term in theta_i.
+      # To every example, add in a 1 as a constant to be multiplied by the bias term in self.Θs[i].
       A = utils.prepend_column_of_ones(A)
       
-      Z = A @ self.Θs[i] # theta_i acts on the rows of A.
+      Z = A @ self.Θs[i] # self.Θs[i] acts on the rows of A.
       A = utils.sigmoid(Z)
 
     h_theta = A
@@ -53,6 +54,37 @@ class NeuralNetwork(Model):
 
   def __repr__(self) -> str:
     raise NotImplemented
+
+"""
+J is our loss function.
+"""
+
+def J(data: np.ndarray, model: Model):
+  y = data[:, -1:] # the output is the last column in the data array
+  X = data[:, :-1] # everything else is the input
+  m, n = X.shape
+
+  h_theta = model.predict(X)
+  predictions = np.argmax(h_theta, axis=1)
+
+  result = 0
+  # Nonregularized term.
+  for i in range(m):
+    for output in h_theta[i]:
+      if predictions[i] == y[i]:
+        result += -np.log(output)
+      else:
+        result += -np.log(1 - output)
+
+  result /= m
+  return result
+
+def train_neural_network(data: np.ndarray, layer_shapes: List[Tuple[int, int]]) -> Model:
+  # Initialize our weights to random small values.
+  epsilon = 0.1
+
+  initial_Θs = [np.random.uniform(low=-epsilon, high=epsilon, size=shape) for shape in layer_shapes]
+  return gradient_descent(data, NeuralNetwork, J, dJ_dθ_i, initial_Θs)
 
 if __name__ == "__main__":
   data_mat = scipy.io.loadmat('mnist_data.mat')
