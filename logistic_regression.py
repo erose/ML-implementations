@@ -64,26 +64,27 @@ def J(data: np.ndarray, model: Model):
   predicted = model.predict(X)
   return np.mean(y * -np.log(predicted) + (1 - y) * -np.log(1 - predicted))
 
-"""
-The derivative of J with respect to θ_i.
-"""
-
-def dJ_dθ_i(i: int, data: np.ndarray, model: Model):
+def grad_J(data: np.ndarray, model: Model):
+  # Note this function happens to be the same as grad_J in linear_regression.py.
   y = data[:, -1:]
   X = data[:, :-1]
+  _, n = data.shape
+
   error = model.predict(X) - y
 
-  if i == 0:
-    return np.mean(error)
+  result = np.zeros((n, 1))
+  result[0] = np.mean(error)
+  for i in range(1, n):
+    ith_feature_column = X[:, [i - 1]] # theta_1 is the coefficient on the zeroth column of X
+    result[i] = np.mean(ith_feature_column * error)
 
-  ith_feature_column = X[:, [i - 1]] # theta_1 is the coefficient on the zeroth column of X
-  return np.mean(ith_feature_column * error)
+  return result
 
 def logistic_regression(data) -> Model:
   m, n = data.shape
   initial_parameters = np.zeros((n, 1))
   
-  return gradient_descent(data, LogisticModel, J, dJ_dθ_i, initial_parameters)
+  return gradient_descent(data, LogisticModel, J, grad_J, initial_parameters)
 
 def percentage_correct(model, data) -> int:
   """

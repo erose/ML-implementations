@@ -71,6 +71,8 @@ def J(data: np.ndarray, model: Model):
   # Nonregularized term.
   for i in range(m):
     for output in h_theta[i]:
+      # If the prediction is accurate, penalize for distance to probability 1, else penalize for
+      # distance from probability 0.
       if predictions[i] == y[i]:
         result += -np.log(output)
       else:
@@ -84,7 +86,7 @@ def train_neural_network(data: np.ndarray, layer_shapes: List[Tuple[int, int]]) 
   epsilon = 0.1
 
   initial_Θs = [np.random.uniform(low=-epsilon, high=epsilon, size=shape) for shape in layer_shapes]
-  return gradient_descent(data, NeuralNetwork, J, dJ_dθ_i, initial_Θs)
+  return gradient_descent(data, NeuralNetwork, J, grad_J, initial_Θs)
 
 if __name__ == "__main__":
   data_mat = scipy.io.loadmat('mnist_data.mat')
