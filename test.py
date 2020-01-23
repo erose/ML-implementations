@@ -1,4 +1,5 @@
 import unittest
+import copy
 import numpy as np
 import numpy.testing
 
@@ -6,6 +7,19 @@ import utils
 import linear_regression as linr
 import logistic_regression as logr
 import neural_network as nn
+
+class TestUtils(unittest.TestCase):
+  def test_one_hots(self):
+    a = np.array([6, 0, 3])
+
+    numpy.testing.assert_array_equal(
+      utils.one_hots(a),
+      np.array([
+        [0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0],
+      ])
+    )
 
 class TestLinearModel(unittest.TestCase):
   def test_model_can_be_printed(self):
@@ -114,11 +128,13 @@ class TestNeuralNetwork(unittest.TestCase):
     numpy.testing.assert_almost_equal(model.predict(X), expected_output, decimal=3)
 
   def test_cost_function_on_simple_model(self):
+    # The network has two layers, with two input nodes and two output nodes. Both output nodes
+    # compute the same function.
     model = nn.NeuralNetwork([
       np.array([
-        [0.0],
-        [1.0],
-        [1.0]
+        [0.0, 0.0],
+        [1.0, 1.0],
+        [1.0, 1.0]
       ]),
     ])
 
@@ -129,18 +145,111 @@ class TestNeuralNetwork(unittest.TestCase):
 
     log, σ = np.log, utils.sigmoid
     expected_cost = np.mean([
-      # We always predict 0, so the first example suffers a cost for being unconfident.
-      -log(σ(2)),
+      # We always predict 0, so the first example suffers:
+      #  - a cost for being underconfident in the first output node.
+      #  - a cost for being overconfident in the second output node.
+      -log(σ(2)) + -log(1 - σ(2)),
 
-      # We always predict 0, so the second example suffers a cost for being confident.
-      -log(1 - σ(-1)),
+      # We always predict 0, so the second example suffers:
+      #  - a cost for being overconfident in the first output node.
+      #  - a cost for being underconfident in the second output node.
+      -log(1 - σ(-1)) + -log(σ(-1)),
     ])
     cost = nn.J(data, model)
 
     self.assertAlmostEqual(expected_cost, cost, places=3)
 
-  # def test_can_learn_doubling_function(self):
-  #   model = nn.
+  def test_can_compute_gradient_of_cost_function(self):
+    # The network has three layers, with two input nodes and two output nodes per layer.
+    model = nn.NeuralNetwork([
+      np.array([
+        [0.0,  0.0],
+        [1.0,  0.5],
+        [1.0, -1.0]
+      ]),
+
+      np.array([
+        [ 0.1, 0.0],
+        [-8.0, 1.0],
+        [ 0.0, 1.0]
+      ]),
+    ])
+
+    data = np.array([
+      [2.0,  0.0, 0],
+      [0.0, -1.0, 1],
+    ])
+
+    grad = nn.grad_J(data, model)
+    approx_grad = self.compute_approximate_gradient_by_finite_difference(data, model)
+
+    numpy.testing.assert_almost_equal(grad, approx_grad, decimal=3)
+
+  def compute_approximate_gradient_by_finite_difference(self, data: np.ndarray, net: nn.NeuralNetwork) -> np.ndarray:
+    """
+    Utility method only used in test. This is a "brute force" way of computing the gradient we check
+    against our more efficient, but trickier, implementation.
+    """
+    ϵ = 0.001
+
+    result = []
+    for l, Θ in enumerate(net.Θs):
+      m, n = Θ.shape
+      dΘ = np.zeros((m, n))
+      for i in range(m):
+        for j in range(n):
+          # We want to compute d/dΘ_ij numerically. What we do is vary Θ_ij slightly, compute the
+          # cost before and after, and look at the difference between them.
+
+          # In math, we are doing d/dΘ_ij = (J(..., Θ_ij + ϵ, ...) - J(..., Θ_ij, ...)) / ϵ.
+
+          # Our cost function doesn't take a list of theta matrices directly, so we construct a
+          # plus_epsilon model in order to calcuate the above. We do this
+          # with a lot of copying. Happily this is just a test method, so hopefully the inefficiency
+          # won't bite us too badly.
+
+          Θs_copy = copy.deepcopy(net.Θs)
+          Θs_copy[l][i][j] += ϵ
+          net_plus_epsilon = nn.NeuralNetwork(Θs_copy)
+
+          dΘ[i][j] = (nn.J(data, net_plus_epsilon) - nn.J(data, net)) / ϵ
+
+      result.append(dΘ)
+
+    return np.array(result)
+
+  def test_cost_decreases_when_gradient_is_applied(self):
+    # The network has two layers, with two input nodes and two output nodes. Both output nodes
+    # compute the same function.
+    model = nn.NeuralNetwork([
+      np.array([
+        [0.0, 0.0],
+        [1.0, 1.0],
+        [1.0, 1.0]
+      ]),
+    ])
+
+    data = np.array([
+      [2.0,  0.0, 0],
+      [0.0, -1.0, 1],
+    ])
+    gradient = self.compute_approximate_gradient_by_finite_difference(data, model)
+    cost_before = nn.J(data, model)
+
+    alpha = 0.01 # Arbitrary.
+    model.adjust_by(-alpha * gradient)
+
+    cost_after = nn.J(data, model)
+    self.assertTrue(cost_after < cost_before)
+
+  def test_can_learn_left_vs_right(self):
+    data = np.array([
+      [ 2.0,  0.0, 0],
+      [ 0.0, -1.0, 1],
+      [ 0.0, -6.0, 1],
+      [-1.0,  0.0, 0],
+    ])
+    model = nn.train_neural_network(data, [2, 2, 2])
 
 if __name__ == '__main__':
   unittest.main()

@@ -12,5 +12,9 @@ class Model(ABC):
     pass
 
   @abstractmethod
+  def adjust_by(self, delta: Any):
+    pass
+
+  @abstractmethod
   def __repr__(self) -> str:
     pass
