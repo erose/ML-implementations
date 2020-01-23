@@ -116,30 +116,51 @@ def grad_J(data: np.ndarray, model: Model):
   one_hots = utils.one_hots(y[:, 0]) # one_hots accepts a one-dimensional argument.
   layers = len(trace)
   result = []
-  
+
+  # Compute the gradient for the last layer first. It's a special case.
   δ = As[layers - 1] - one_hots
   grad = _compute_gradient(δ, As[layers - 2])
   result.append(grad)
 
+  # Now, starting with the second-to-last layer, compute each gradient
   for l in range(layers - 2, 0, -1):
     δ = _compute_delta(δ, model.Θs[l], Zs[l])
     grad = _compute_gradient(δ, As[l - 1])
-
     result.append(grad)
 
-  # Transpose the results and return them in reverse order, as a numpy array.
-  result = np.array([dΘ.T for dΘ in result[::-1]])
+  # Now that all results are collected, make it an np.ndarray, because only now do we know the shape
+  # of such an array.
+  result = np.array(result)
+  # Reverse the results since the first one is the gradient for the final layer.
+  result = result[::-1]
   result /= m # Account for the (1/m) in the loss function.
   return result
 
-# TODO: Explain.
-def _compute_gradient(δ, A_prev):
-  return δ.T @ utils.prepend_column_of_ones(A_prev)
+def _compute_delta(δ, Θ, Z):
+  """
+  Based on the following equation.
+  δ_l = ((Θ_{l+1})^T @ δ_{l+1}) * sigmoid_gradient(z_l)
 
-# TODO: Explain.
-def _compute_delta(old_δ, Θ, Z):
-  Θ = Θ[1:] # chop off the bias weights
-  return (old_δ @ Θ.T) * utils.sigmoid_gradient(Z)
+  In the equation, δ and Z are vectors, but in the code they are matrices for better performance.
+  """
+
+  Θ = Θ[1:] # Chop off the bias weights.
+
+  # Since δ and Θ.T are both matrices, flip the multiplication around so Θ.T acts on the rows of δ.
+  return (δ @ Θ.T) * utils.sigmoid_gradient(Z)
+
+def _compute_gradient(δ, A):
+  """
+  Based on the following equation.
+  grad_l = δ_{l+1} @ a_l^T
+
+  In the equation, δ and a are vectors, but in the code they are matrices for better performance.
+  """
+
+  A = utils.prepend_column_of_ones(A) # Add bias column in.
+
+  # Since δ and A.T are both matrices, flip the multiplication around so A.T acts on the rows of δ.
+  return A.T @ δ
 
 def train_neural_network(data: np.ndarray, nodes_per_layer: List[int]) -> NeuralNetwork:
   # Initialize our weights to random small values.
