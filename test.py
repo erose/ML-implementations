@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 import numpy.testing
+import scipy
 
 import utils
 import test_utils
@@ -126,6 +127,29 @@ class TestNeuralNetwork(unittest.TestCase):
 
     numpy.testing.assert_almost_equal(model.feedforward(X), expected_output, decimal=3)
 
+  def test_correct_feedforward_with_coursera_weights(self):
+    data_mat = scipy.io.loadmat('mnist_data.mat')
+    X = data_mat['X']
+    y = data_mat['y'] % 10 # The data encodes '0' as '10'.
+
+    weights_mat = scipy.io.loadmat('mnist_weights.mat')
+    # Take the transpose because the convention used in these files is different than ours.
+    theta1 = weights_mat['Theta1'].T
+    theta2 = weights_mat['Theta2'].T
+
+    model = nn.NeuralNetwork([theta1, theta2])
+    # There's a subtlety with this data, so we manually handle the translation between probabilities
+    # and predictions rather than call .predict. Because the weights think of '0' as '10', the last
+    # probability in a row is really the probability that the digit is '0', not '9'. So we cyclically
+    # shift each row one to the right to correct this.
+    probabilities = model.feedforward(X)
+    probabilities = np.roll(probabilities, 1)
+    predictions = np.argmax(probabilities, axis=1)
+
+    accuracy = np.mean(predictions == y[:, 0])
+    expected_accuracy = 0.977
+    self.assertAlmostEqual(accuracy, expected_accuracy, places=3)
+
   def test_cost_function_on_simple_model(self):
     # The network has two layers, with two input nodes and two output nodes. Both output nodes
     # compute the same function.
@@ -212,7 +236,7 @@ class TestNeuralNetwork(unittest.TestCase):
     data = np.array([
       [ 2.0,  0.0, 0],
       [ 0.0, -1.0, 1],
-      [ 0.0, -6.0, 1],
+      [ 0.0,  6.0, 1],
       [-1.0,  0.0, 0],
     ])
     # Training uses random initialization, so seed the generator to ensure we get the same value
@@ -221,15 +245,12 @@ class TestNeuralNetwork(unittest.TestCase):
     model = nn.train_neural_network(data, [2, 2, 2])
 
     X = np.array([
-      [2.0,  0.0],
-      [0.0, -1.0],
+      [ 10.0, 0.0],
+      [  0.0, 5.0],
     ])
-    prediction = model.feedforward(X)
+    prediction = model.predict(X)
 
-    expected_prediction = np.array([
-      [0.898, 0.102],
-      [0.265, 0.733],
-    ])
+    expected_prediction = np.array([0, 1])
     numpy.testing.assert_almost_equal(prediction, expected_prediction, decimal=3)
 
 if __name__ == '__main__':

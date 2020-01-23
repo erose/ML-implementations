@@ -41,13 +41,7 @@ class NeuralNetwork(Model):
       self.Θs[i] += deltas[i]
 
   def predict(self, X: np.ndarray) -> np.ndarray:
-    probabilities = model.feedforward(X)
-    
-    # Because the weights think of '0' as '10', the last probability in a row is really the
-    # probability that the digit is '0', not '9'. So we cyclically shift each row one to the right to
-    # correct this.
-    probabilities = np.roll(probabilities, 1)
-    
+    probabilities = self.feedforward(X)
     predictions = np.argmax(probabilities, axis=1)
     return predictions
 
@@ -158,16 +152,4 @@ def train_neural_network(data: np.ndarray, nodes_per_layer: List[int]) -> Neural
   return gradient_descent(data, NeuralNetwork, J, grad_J, initial_Θs)
 
 if __name__ == "__main__":
-  data_mat = scipy.io.loadmat('mnist_data.mat')
-  X = data_mat['X']
-  y = data_mat['y'] % 10 # The data encodes '0' as '10'.
-
-  weights_mat = scipy.io.loadmat('mnist_weights.mat')
-  # Take the transpose because the convention used in these files is different than ours.
-  theta1 = weights_mat['Theta1'].T
-  theta2 = weights_mat['Theta2'].T
-
-  model = NeuralNetwork([theta1, theta2])
-  predictions = model.predict(X)
-
-  print("Training set accuracy:", np.mean(predictions == y[:, 0]))
+  pass
