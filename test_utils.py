@@ -5,8 +5,8 @@ import numpy as np
 
 def compute_approximate_gradient_by_finite_difference(data: np.ndarray, net: nn.NeuralNetwork) -> np.ndarray:
   """
-  Utility method only used in test. This is a "brute force" way of computing the gradient we check
-  against our more efficient, but trickier, implementation.
+  This is a "brute force" way of computing the gradient we check against our more efficient, but
+  trickier, implementation.
   """
   ϵ = 0.001
 

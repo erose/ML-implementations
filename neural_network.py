@@ -108,33 +108,38 @@ def grad_J(data: np.ndarray, model: Model):
 
   model = cast(NeuralNetwork, model)
   trace = model.feedforward_trace(X)
+  Zs = [Z for (Z, _) in trace]
+  As = [A for (_, A) in trace]
+
   # The one-hot vectors indicate which class is accurate. They are useful for vectorizing the cost
   # computation below.
   one_hots = utils.one_hots(y[:, 0]) # one_hots accepts a one-dimensional argument.
   result = []
 
-  Zs = [Z for (Z, _) in trace]
-  As = [A for (_, A) in trace]
-
-  A = As[len(trace) - 1]
-  A_prev = As[len(trace) - 2]
+  layers = len(trace)
+  A = As[layers - 1]
+  A_prev = As[layers - 2]
   
   δ = A - one_hots
   A_prev = utils.prepend_column_of_ones(A_prev)
-  result.append(δ.T @ A_prev / m)
+  grad = δ.T @ A_prev
+  result.append(grad)
 
-  for step in range(len(trace) - 2, 0, -1):
-    A_prev = As[step - 1]
-    Z = Zs[step]
-    Θ = model.Θs[step]
+  for l in range(layers - 2, 0, -1):
+    A_prev = As[l - 1]
+    Z = Zs[l]
+    Θ = model.Θs[l]
 
     Θ = Θ[1:] # chop off the bias weights
     δ = (δ @ Θ.T) * utils.sigmoid_gradient(Z)
     A_prev = utils.prepend_column_of_ones(A_prev)
-    result.append(δ.T @ A_prev / m)
+    grad = δ.T @ A_prev
+    result.append(grad)
 
   # Transpose the results and return them in reverse order, as a numpy array.
-  return np.array([dΘ.T for dΘ in result[::-1]])
+  result = np.array([dΘ.T for dΘ in result[::-1]])
+  result /= m # Account for the (1/m) in the loss function.
+  return result
 
 def train_neural_network(data: np.ndarray, nodes_per_layer: List[int]) -> NeuralNetwork:
   # Initialize our weights to random small values.
