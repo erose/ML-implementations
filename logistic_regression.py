@@ -99,7 +99,7 @@ def percentage_correct(model, data) -> int:
   return int((number_correct / predicted.size) * 100)
 
 if __name__ == "__main__":
-  df = pandas.read_csv('boston_housing.csv')
+  df = pandas.read_csv('data/boston_housing.csv')
   data = df[['medv', 'chas']].to_numpy()
 
   model = logistic_regression(data)

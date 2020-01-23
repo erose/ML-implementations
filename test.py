@@ -128,11 +128,11 @@ class TestNeuralNetwork(unittest.TestCase):
     numpy.testing.assert_almost_equal(model.feedforward(X), expected_output, decimal=3)
 
   def test_correct_feedforward_with_coursera_weights(self):
-    data_mat = scipy.io.loadmat('mnist_data.mat')
+    data_mat = scipy.io.loadmat('data/mnist_data.mat')
     X = data_mat['X']
     y = data_mat['y'] % 10 # The data encodes '0' as '10'.
 
-    weights_mat = scipy.io.loadmat('mnist_weights.mat')
+    weights_mat = scipy.io.loadmat('data/mnist_weights.mat')
     # Take the transpose because the convention used in these files is different than ours.
     theta1 = weights_mat['Theta1'].T
     theta2 = weights_mat['Theta2'].T

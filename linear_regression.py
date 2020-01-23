@@ -85,7 +85,7 @@ def linear_regression(data) -> Model:
   return gradient_descent(data, LinearModel, J, grad_J, initial_parameters)
 
 if __name__ == "__main__":
-  df = pandas.read_csv('boston_housing.csv')
+  df = pandas.read_csv('data/boston_housing.csv')
   data = df[['dis', 'rm', 'medv']].to_numpy()
 
   model = linear_regression(data)
