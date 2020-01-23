@@ -3,11 +3,12 @@ import numpy as np
 
 from model import Model
 
+T = TypeVar('T', bound=Model)
 def gradient_descent(
   data: np.ndarray,
-  model_class: Type[Model],
-  J: Callable[[np.ndarray, Model], float],
-  grad_J: Callable[[np.ndarray, Model], float],
+  model_class: Type[T],
+  J: Callable[[np.ndarray, T], float],
+  grad_J: Callable[[np.ndarray, T], float],
   initial_parameters: Any,
   iterations=5000
 ):
