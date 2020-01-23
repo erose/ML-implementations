@@ -249,7 +249,22 @@ class TestNeuralNetwork(unittest.TestCase):
       [ 0.0, -6.0, 1],
       [-1.0,  0.0, 0],
     ])
+    # Training uses random initialization, so seed the generator to ensure we get the same value
+    # every time.
+    np.random.seed(0)
     model = nn.train_neural_network(data, [2, 2, 2])
+
+    X = np.array([
+      [2.0,  0.0],
+      [0.0, -1.0],
+    ])
+    prediction = model.predict(X)
+
+    expected_prediction = np.array([
+      [0.898, 0.102],
+      [0.265, 0.733],
+    ])
+    numpy.testing.assert_almost_equal(prediction, expected_prediction, decimal=3)
 
 if __name__ == '__main__':
   unittest.main()
