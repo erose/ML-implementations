@@ -104,7 +104,7 @@ def J(data: np.ndarray, model: Model) -> float:
 def grad_J(data: np.ndarray, model: Model):
   y = data[:, -1:]
   X = data[:, :-1]
-  m, n = data.shape
+  m, _ = data.shape
 
   model = cast(NeuralNetwork, model)
   trace = model.feedforward_trace(X)
@@ -122,7 +122,7 @@ def grad_J(data: np.ndarray, model: Model):
   grad = _compute_gradient(δ, As[layers - 2])
   result.append(grad)
 
-  # Now, starting with the second-to-last layer, compute each gradient
+  # Now, starting with the second-to-last layer, compute each gradient.
   for l in range(layers - 2, 0, -1):
     δ = _compute_delta(δ, model.Θs[l], Zs[l])
     grad = _compute_gradient(δ, As[l - 1])
@@ -162,7 +162,7 @@ def _compute_gradient(δ, A):
   # Since δ and A.T are both matrices, flip the multiplication around so A.T acts on the rows of δ.
   return A.T @ δ
 
-def train_neural_network(data: np.ndarray, nodes_per_layer: List[int]) -> NeuralNetwork:
+def train_neural_network(data: np.ndarray, nodes_per_layer: List[int], **kwargs) -> NeuralNetwork:
   # Initialize our weights to random small values.
   epsilon = 0.1
 
@@ -175,7 +175,7 @@ def train_neural_network(data: np.ndarray, nodes_per_layer: List[int]) -> Neural
     Θ_shapes[i] = (m + 1, n)
 
   initial_Θs = [np.random.uniform(low=-epsilon, high=epsilon, size=shape) for shape in Θ_shapes]
-  return gradient_descent(data, NeuralNetwork, J, grad_J, initial_Θs)
+  return gradient_descent(data, NeuralNetwork, J, grad_J, initial_Θs, **kwargs)
 
 if __name__ == "__main__":
   pass
