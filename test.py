@@ -1,9 +1,9 @@
 import unittest
-import copy
 import numpy as np
 import numpy.testing
 
 import utils
+import test_utils
 import linear_regression as linr
 import logistic_regression as logr
 import neural_network as nn
@@ -180,42 +180,9 @@ class TestNeuralNetwork(unittest.TestCase):
     ])
 
     grad = nn.grad_J(data, model)
-    approx_grad = self.compute_approximate_gradient_by_finite_difference(data, model)
+    approx_grad = test_utils.compute_approximate_gradient_by_finite_difference(data, model)
 
     numpy.testing.assert_almost_equal(grad, approx_grad, decimal=3)
-
-  def compute_approximate_gradient_by_finite_difference(self, data: np.ndarray, net: nn.NeuralNetwork) -> np.ndarray:
-    """
-    Utility method only used in test. This is a "brute force" way of computing the gradient we check
-    against our more efficient, but trickier, implementation.
-    """
-    ϵ = 0.001
-
-    result = []
-    for l, Θ in enumerate(net.Θs):
-      m, n = Θ.shape
-      dΘ = np.zeros((m, n))
-      for i in range(m):
-        for j in range(n):
-          # We want to compute d/dΘ_ij numerically. What we do is vary Θ_ij slightly, compute the
-          # cost before and after, and look at the difference between them.
-
-          # In math, we are doing d/dΘ_ij = (J(..., Θ_ij + ϵ, ...) - J(..., Θ_ij, ...)) / ϵ.
-
-          # Our cost function doesn't take a list of theta matrices directly, so we construct a
-          # plus_epsilon model in order to calcuate the above. We do this
-          # with a lot of copying. Happily this is just a test method, so hopefully the inefficiency
-          # won't bite us too badly.
-
-          Θs_copy = copy.deepcopy(net.Θs)
-          Θs_copy[l][i][j] += ϵ
-          net_plus_epsilon = nn.NeuralNetwork(Θs_copy)
-
-          dΘ[i][j] = (nn.J(data, net_plus_epsilon) - nn.J(data, net)) / ϵ
-
-      result.append(dΘ)
-
-    return np.array(result)
 
   def test_cost_decreases_when_gradient_is_applied(self):
     # The network has two layers, with two input nodes and two output nodes. Both output nodes
@@ -232,7 +199,7 @@ class TestNeuralNetwork(unittest.TestCase):
       [2.0,  0.0, 0],
       [0.0, -1.0, 1],
     ])
-    gradient = self.compute_approximate_gradient_by_finite_difference(data, model)
+    gradient = test_utils.compute_approximate_gradient_by_finite_difference(data, model)
     cost_before = nn.J(data, model)
 
     alpha = 0.01 # Arbitrary.

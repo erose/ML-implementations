@@ -41,7 +41,15 @@ class NeuralNetwork(Model):
       self.Θs[i] += deltas[i]
 
   def predict(self, X: np.ndarray) -> np.ndarray:
-    pass
+    probabilities = model.feedforward(X)
+    
+    # Because the weights think of '0' as '10', the last probability in a row is really the
+    # probability that the digit is '0', not '9'. So we cyclically shift each row one to the right to
+    # correct this.
+    probabilities = np.roll(probabilities, 1)
+    
+    predictions = np.argmax(probabilities, axis=1)
+    return predictions
 
   def feedforward(self, X: np.ndarray) -> np.ndarray:
     # The activation of the last layer is the probabilities we want.
@@ -158,13 +166,8 @@ if __name__ == "__main__":
   # Take the transpose because the convention used in these files is different than ours.
   theta1 = weights_mat['Theta1'].T
   theta2 = weights_mat['Theta2'].T
-  model = NeuralNetwork([theta1, theta2])
 
-  probabilities = model.feedforward(X)
-  # Because the weights think of '0' as '10', the last probability in a row is really the
-  # probability that the digit is '0', not '9'. So we cyclically shift each row one to the right to
-  # correct this.
-  probabilities = np.roll(probabilities, 1)
-  predictions = np.argmax(probabilities, axis=1)
+  model = NeuralNetwork([theta1, theta2])
+  predictions = model.predict(X)
 
   print("Training set accuracy:", np.mean(predictions == y[:, 0]))
