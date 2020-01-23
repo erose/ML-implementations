@@ -21,12 +21,11 @@ class TestUtils(unittest.TestCase):
       ])
     )
 
-class TestLinearModel(unittest.TestCase):
+class TestLinearRegression(unittest.TestCase):
   def test_model_can_be_printed(self):
     model = linr.LinearModel(np.array([[2, 1, 0]]).T)
     self.assertEqual(str(model), "2 + 1*x_1 + 0*x_2")
 
-class TestLinearRegression(unittest.TestCase):
   def test_cost_function_on_constant_model(self):
     dumb_model = linr.LinearModel(np.array([[6, 0]]).T)
 
@@ -125,7 +124,7 @@ class TestNeuralNetwork(unittest.TestCase):
       [utils.sigmoid(-1)]
     ])
 
-    numpy.testing.assert_almost_equal(model.predict(X), expected_output, decimal=3)
+    numpy.testing.assert_almost_equal(model.feedforward(X), expected_output, decimal=3)
 
   def test_cost_function_on_simple_model(self):
     # The network has two layers, with two input nodes and two output nodes. Both output nodes
@@ -258,7 +257,7 @@ class TestNeuralNetwork(unittest.TestCase):
       [2.0,  0.0],
       [0.0, -1.0],
     ])
-    prediction = model.predict(X)
+    prediction = model.feedforward(X)
 
     expected_prediction = np.array([
       [0.898, 0.102],

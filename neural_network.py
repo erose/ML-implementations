@@ -41,14 +41,17 @@ class NeuralNetwork(Model):
       self.Θs[i] += deltas[i]
 
   def predict(self, X: np.ndarray) -> np.ndarray:
+    pass
+
+  def feedforward(self, X: np.ndarray) -> np.ndarray:
     # The activation of the last layer is the probabilities we want.
-    trace = self.feedforward(X)
+    trace = self.feedforward_trace(X)
     _, A_last = trace[-1]
 
     h_theta = A_last
     return h_theta
 
-  def feedforward(self, X: np.ndarray) -> List[Tuple[np.ndarray, np.ndarray]]:
+  def feedforward_trace(self, X: np.ndarray) -> List[Tuple[np.ndarray, np.ndarray]]:
     """
     X is an a x b array of feature vectors, where b+1 is the number of nodes in the first layer of the
     network. (The +1 is because of the bias node.)
@@ -86,7 +89,7 @@ def J(data: np.ndarray, model: Model) -> float:
   X = data[:, :-1] # everything else is the input
   m, _ = X.shape
 
-  h_theta = model.predict(X)
+  h_theta = model.feedforward(X)
   # The one-hot vectors indicate which class is accurate. They are useful for vectorizing the cost
   # computation below.
   one_hots = utils.one_hots(y[:, 0]) # one_hots accepts a one-dimensional argument.
@@ -102,7 +105,7 @@ def grad_J(data: np.ndarray, model: Model):
   m, n = data.shape
 
   model = cast(NeuralNetwork, model)
-  trace = model.feedforward(X)
+  trace = model.feedforward_trace(X)
   # The one-hot vectors indicate which class is accurate. They are useful for vectorizing the cost
   # computation below.
   one_hots = utils.one_hots(y[:, 0]) # one_hots accepts a one-dimensional argument.
@@ -157,7 +160,7 @@ if __name__ == "__main__":
   theta2 = weights_mat['Theta2'].T
   model = NeuralNetwork([theta1, theta2])
 
-  probabilities = model.predict(X)
+  probabilities = model.feedforward(X)
   # Because the weights think of '0' as '10', the last probability in a row is really the
   # probability that the digit is '0', not '9'. So we cyclically shift each row one to the right to
   # correct this.
