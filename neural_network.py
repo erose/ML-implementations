@@ -114,32 +114,32 @@ def grad_J(data: np.ndarray, model: Model):
   # The one-hot vectors indicate which class is accurate. They are useful for vectorizing the cost
   # computation below.
   one_hots = utils.one_hots(y[:, 0]) # one_hots accepts a one-dimensional argument.
-  result = []
-
   layers = len(trace)
-  A = As[layers - 1]
-  A_prev = As[layers - 2]
+  result = []
   
-  δ = A - one_hots
-  A_prev = utils.prepend_column_of_ones(A_prev)
-  grad = δ.T @ A_prev
+  δ = As[layers - 1] - one_hots
+  grad = _compute_gradient(δ, As[layers - 2])
   result.append(grad)
 
   for l in range(layers - 2, 0, -1):
-    A_prev = As[l - 1]
-    Z = Zs[l]
-    Θ = model.Θs[l]
+    δ = _compute_delta(δ, model.Θs[l], Zs[l])
+    grad = _compute_gradient(δ, As[l - 1])
 
-    Θ = Θ[1:] # chop off the bias weights
-    δ = (δ @ Θ.T) * utils.sigmoid_gradient(Z)
-    A_prev = utils.prepend_column_of_ones(A_prev)
-    grad = δ.T @ A_prev
     result.append(grad)
 
   # Transpose the results and return them in reverse order, as a numpy array.
   result = np.array([dΘ.T for dΘ in result[::-1]])
   result /= m # Account for the (1/m) in the loss function.
   return result
+
+# TODO: Explain.
+def _compute_gradient(δ, A_prev):
+  return δ.T @ utils.prepend_column_of_ones(A_prev)
+
+# TODO: Explain.
+def _compute_delta(old_δ, Θ, Z):
+  Θ = Θ[1:] # chop off the bias weights
+  return (old_δ @ Θ.T) * utils.sigmoid_gradient(Z)
 
 def train_neural_network(data: np.ndarray, nodes_per_layer: List[int]) -> NeuralNetwork:
   # Initialize our weights to random small values.
