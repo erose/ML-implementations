@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 import numpy.testing
 import scipy
+import scipy.io
 
 import utils
 import test_utils

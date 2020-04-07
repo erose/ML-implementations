@@ -1,6 +1,5 @@
 from typing import *
 import numpy as np
-import scipy.io
 
 import utils
 from gradient_descent import gradient_descent
@@ -91,6 +90,7 @@ def J(data: np.ndarray, model: Model) -> float:
   X = data[:, :-1] # everything else is the input
   m, _ = X.shape
 
+  model = cast(NeuralNetwork, model)
   h_theta = model.feedforward(X)
   # The one-hot vectors indicate which class is accurate. They are useful for vectorizing the cost
   # computation below.
