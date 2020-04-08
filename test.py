@@ -243,7 +243,7 @@ class TestNeuralNetwork(unittest.TestCase):
     # Training uses random initialization, so seed the generator to ensure we get the same value
     # every time.
     np.random.seed(0)
-    model = nn.train_neural_network(data, [2, 2, 2], iterations=500)
+    model = nn.train_neural_network(data, [2, 2, 2], epochs=500)
 
     X = np.array([
       [ 10.0, 0.0],
