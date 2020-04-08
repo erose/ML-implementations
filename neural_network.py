@@ -1,7 +1,9 @@
 from typing import *
 import numpy as np
+import scipy.io
 
 import utils
+import pytorch_neural_network
 from gradient_descent import gradient_descent
 from model import Model
 
@@ -177,5 +179,39 @@ def train_neural_network(data: np.ndarray, nodes_per_layer: List[int], **kwargs)
   initial_Θs = [np.random.uniform(low=-epsilon, high=epsilon, size=shape) for shape in Θ_shapes]
   return gradient_descent(data, NeuralNetwork, J, grad_J, initial_Θs, **kwargs)
 
+def percentage_correctly_classified(data, model) -> float:
+  """
+  Returns a number out of 100.
+  """
+
+  y = data[:, -1:]
+  X = data[:, :-1]
+
+  predicted = model.predict(X)
+  number_correct = np.sum(predicted == y[:, 0])
+  return (number_correct / predicted.size) * 100
+
 if __name__ == "__main__":
-  pass
+  data_mat = scipy.io.loadmat('data/mnist_data.mat')
+  X = data_mat['X']
+  y = data_mat['y'] % 10 # The data encodes '0' as '10'.
+  data = np.c_[X, y]
+
+  # Randomly hold back 30% of our data to be test data.
+  np.random.shuffle(data)
+  m, _ = data.shape
+  cutoff = round(m / 3)
+
+  hyperparams = dict(epochs=1000, learning_rate=1)
+  test_data = data[0:cutoff, :]
+  training_data = data[cutoff:-1, :]
+
+  # Train and test our model.
+  model = train_neural_network(training_data, [400, 30, 10], verbose=True, **hyperparams)
+  print("Our model's percentage_correct on the test data: ", percentage_correctly_classified(test_data, model))
+  print("Our model's loss on the test data: ", J(test_data, model))
+
+  # Train and test using pytorch for comparison.
+  percentage_correct, loss = pytorch_neural_network.train_and_test(training_data, test_data, **hyperparams)
+  print("pytorch's percentage correct on the test data: ", percentage_correct)
+  print("pytorch's loss on the test data: ", loss)
